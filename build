@@ -1,0 +1,224 @@
+# 2021.3.17
+
+echo "create project start..."
+#-------------------------数据-------------------------------------------------
+#项目名
+project=$1
+#项目包
+Prepackage=$2
+
+
+
+
+
+#-------------------------数据-------------------------------------------------
+
+#检查项目名称
+#如果为空
+if [ -z "$1" ];then
+echo "please input the project name,such as './bulid Test com.example '"
+echo "create project fail !"
+exit 0
+fi
+
+#如果纯在
+if [ -d "$1" ]; then
+echo "The project \"$1\" had exists, you must use another name"
+echo "create project fail !"
+exit 0
+fi
+
+#检查项目包名称
+if [ -z "$2" ];then
+package="com.example.apps";
+else
+#package=$(echo $2 | tr '[A-Z]' '[a-z]' )
+package=$2
+fi
+
+#获取小写的项目名称
+var=$(echo $1 | tr '[A-Z]' '[a-z]' )
+
+package_dir=$(echo $package | sed -e 's/\./\//g' )
+
+#制作项目目录
+mkdir $1
+
+#进入项目根目录
+cd $1
+
+#init gradle
+gradle init
+
+if [ $? -eq 0 ]; then
+#后退回工具根目录
+    cd ..
+	fi
+#更改代码路径
+rm -rf $1/app/src/main/java/
+mkdir -p $1/app/src/main/java/$package_dir
+
+mkdir -p $1/app/src/test/java/$package_dir
+
+mkdir -p $1/app/src/androidTest/java/$package_dir
+
+cp -r res/  $1/app/src/main/res
+
+sed -i "s/appName/$1/g" $1/app/src/main/res/values/strings.xml
+
+#进入项目根目录
+cd $1
+echo "" >settings.gradle 
+ echo "include ':app'" >settings.gradle
+cd  app
+
+mkdir libs
+
+#返回项目根目录
+cd ..
+cd ..
+#file=$4
+
+
+# 生成类
+class=$(echo $file | awk -F '.' '{print $1}')
+
+
+echo "start compile......."
+
+# 编译java类
+javac -encoding UTF-8 -cp freemarker.jar Generate.java
+
+if [ $? -eq 0 ]; then
+    echo "compile success,ready run..."
+
+    # 运行
+	java -cp ".;freemarker.jar" Generate "$1" "$2"
+    if [ $? -eq 0 ]; then
+        echo "run complete!"
+    else
+        echo "run error!"
+    fi
+else
+    echo "compile error!"
+fi
+
+ rm -f Generate.class
+
+ ############################################ buildSrc ######################################################
+  #更改代码路径
+  rm -rf $1/buildSrc/src/main/kotlin/
+  mkdir -p $1/buildSrc/src/main/kotlin/
+#复制文件
+cp -r marker/buildsrc/KotlinConstants.kt  $1/buildSrc/src/main/kotlin
+#进入项目根目录
+cd $1
+ cd  buildSrc
+  mkdir libs
+
+  #返回项目根目录
+  cd ..
+  cd ..
+
+ # 生成类
+ class=$(echo $file | awk -F '.' '{print $1}')
+ echo "start compile......."
+ # 编译java类
+ javac -encoding UTF-8 -cp freemarker.jar GeneratebuildSrc.java
+
+ if [ $? -eq 0 ]; then
+     echo "compile success,ready run..."
+
+     # 运行
+ 	java -cp ".;freemarker.jar" GeneratebuildSrc "$1" "$2"
+     if [ $? -eq 0 ]; then
+         echo "run complete!"
+     else
+         echo "run error!"
+     fi
+ else
+     echo "compile error!"
+ fi
+
+  rm -f GeneratebuildSrc.class
+
+
+############################################ Module1 ######################################################
+#检查项目名称
+#如果为空
+if [ -z "$3" ];then
+echo "please input the project name,such as './bulid Test com.example '"
+echo "create project fail !"
+exit 0
+fi
+
+#如果纯在
+if [ -d "$3" ]; then
+echo "The project \"$3\" had exists, you must use another name"
+echo "create project fail !"
+exit 0
+fi
+
+#检查项目包名称
+if [ -z "$4" ];then
+package="com.example.apps";
+else
+#package=$(echo $4 | tr '[A-Z]' '[a-z]' )
+package=$4
+fi
+
+#获取小写的项目名称
+var=$(echo $3 | tr '[A-Z]' '[a-z]' )
+package_dir4=$(echo $package | sed -e 's/\./\//g' )
+
+ #更改代码路径
+ rm -rf $1/$3/src/main/java/
+ mkdir -p $1/$3/src/main/java/$package_dir4
+ cp -r res/  $1/$3/src/main/res
+ sed -i "s/appName/$1/g" $1/$3/src/main/res/values/strings.xml
+
+#进入项目根目录 添加类容
+cd $1
+ echo "include ':$3'" >>settings.gradle
+cd  $3
+
+ mkdir libs
+
+ #返回项目根目录
+ cd ..
+ cd ..
+
+ #改java代码
+sed -i "s/app/$3/g" Generate.java
+
+
+# 生成类
+class=$(echo $file | awk -F '.' '{print $1}')
+echo "start compile......."
+# 编译java类
+javac -encoding UTF-8 -cp freemarker.jar Generate.java
+
+if [ $? -eq 0 ]; then
+    echo "compile success,ready run..."
+
+    # 运行
+	java -cp ".;freemarker.jar" Generate "$1" "$2"
+    if [ $? -eq 0 ]; then
+        echo "run complete!"
+    else
+        echo "run error!"
+    fi
+else
+    echo "compile error!"
+fi
+
+ rm -f Generate.class
+#还原java代码
+sed -i "s/$3/app/g" Generate.java
+##########################################################################################################
+
+#  完成执行
+echo "All has been done !"
+#sed -i -e 's|String moduleApp = "app";|String moduleApp = "$3";|' Generate.java
+#./build Demo com.liangke.demo  Module com.suning.Module
+
