@@ -1,11 +1,13 @@
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-
 
 public class Generate {
 	//当前java文件所在的路径，即这个工具所在的根目录。
@@ -33,25 +35,19 @@ public class Generate {
 		PROJECT_ROOT = args[0];
 		PACKGE_NAME = args[1];
 		
-		createBuildGradle();
+//		createBuildGradle();
 
-
-
-
-
-		String moduleApp = "app";
-
-		createAppBuildGradle(PROJECT_ROOT+ "/"+moduleApp);
+//		createAppBuildGradle(PROJECT_ROOT+"/");
 		createAndroidManifest();
 		createIgnoreAndProguardFiles();
-		createTestFiles();
+	//	createTestFiles();
 		createMainActivity();
 	}
-
+	/*
 	//生成module的build.gradle文件
-	private static void createAppBuildGradle(String appPath) throws Exception {
+	private static void createAppBuildGradle(String Path) throws Exception {
 		Template template = getTemplate("build.gradle1.ftl");
-		File file = new File(appPath+"/build.gradle");
+		File file = new File(Path+"/build.gradle");
 		if(!file.exists()) {
 			file.createNewFile();
 		}
@@ -62,25 +58,25 @@ public class Generate {
 		template.process(map, fileWriter);
 		fileWriter.close();
 	}
-
+*/
 	/*
 	 * 生成项目的build.gradle
-	 * */
+	 * *//*
 	public static void createBuildGradle() throws Exception{
 		// 在模板文件目录中找到名称为name的文件
 		Template template = getTemplate("build.gradle.ftl");
 		FileWriter fileWriter = new FileWriter(new File(PROJECT_ROOT+"/build.gradle"));
-
+		
 		Map<Object, Object> map = new HashMap<>();
 		map.put("gradlePluginVersion", "3.2.1");
 		template.process(map, fileWriter);
 		fileWriter.close();
-	}
-
+	}*/
+	
 	/*
 	 * 生成AndroidManifest文件
 	 * */
-
+	
 	public static void createAndroidManifest() throws Exception {
 		Template template = getTemplate("AndroidManifest.xml.ftl");
 		FileWriter fileWriter = new FileWriter(new File(PROJECT_ROOT+"/app/src/main/AndroidManifest.xml"));
@@ -89,10 +85,10 @@ public class Generate {
 		template.process(map, fileWriter);
 		fileWriter.close();
 	}
-
-
+	
+	
 	/*创建混淆文件和忽略文件*/
-
+	
 	public static void createIgnoreAndProguardFiles() throws Exception{
 		//project下的忽略文件
 		Template template = getTemplate(".gitignore.ftl");
@@ -103,11 +99,11 @@ public class Generate {
 		FileWriter fileWriter = new FileWriter(projectIgnoreFile);
 		Map<Object, Object> map = new HashMap<>();
 		template.process(map, fileWriter);
-
-
+		
+		
 		//module下的忽略文件
 		Template template1 = getTemplate(".gitignore1.ftl");
-		File moduleIgnoreFile = new File(PROJECT_ROOT+"/app/.gitignore");
+		File moduleIgnoreFile = new File(PROJECT_ROOT+"//.gitignore");
 		if(!moduleIgnoreFile.exists()) {
 			moduleIgnoreFile.createNewFile();
 		}
@@ -115,33 +111,33 @@ public class Generate {
 		Map<Object, Object> map1 = new HashMap<>();
 		template1.process(map1, fileWriter1);
 		fileWriter1.close();
-
+		
 		//创建混淆文件
 		Template template2 = getTemplate("proguard-rules.pro.ftl");
-		File proguardFile = new File(PROJECT_ROOT+"/app/proguard-rules.pro");
+		File proguardFile = new File(PROJECT_ROOT+"//proguard-rules.pro");
 		if(!proguardFile.exists()) {
 			proguardFile.createNewFile();
 		}
 		FileWriter fileWriter2 = new FileWriter(proguardFile);
 		Map<Object, Object> map2 = new HashMap<>();
 		template2.process(map2, fileWriter2);
-
+		
 		//关流。
 		fileWriter.close();
 		fileWriter1.close();
 		fileWriter2.close();
-
+		
 	}
-
-	/*
+	
+/*	*//*
 	 * 创建Test文件
-	 * */
+	 * *//*
 	public static void createTestFiles() throws Exception{
-
+		
 		//创建ExampleUnitTest类
 		Template template = getTemplate("ExampleUnitTest.java.ftl");
 		String [] packages = PACKGE_NAME.split("\\.");
-		String testFilePath = PROJECT_ROOT+"/app/src/test/java";
+		String testFilePath = PROJECT_ROOT+"//src/test/java";
 		for(int i=0;i<packages.length;i++) {
 			testFilePath = testFilePath+"/"+packages[i];
 		}
@@ -153,11 +149,11 @@ public class Generate {
 		Map<Object, Object> map = new HashMap<>();
 		map.put("packageName", PACKGE_NAME);
 		template.process(map, fileWriter);
-
-
+		
+		
 		//创建ExampleInstrumentedTest类
 		Template template1 = getTemplate("ExampleInstrumentedTest.java.ftl");
-		String androidTestFilePath = PROJECT_ROOT+"/app/src/androidTest/java";
+		String androidTestFilePath = PROJECT_ROOT+"//src/androidTest/java";
 		for(int i=0;i<packages.length;i++) {
 			androidTestFilePath = androidTestFilePath+"/"+packages[i];
 		}
@@ -171,17 +167,17 @@ public class Generate {
 		template1.process(map1, fileWriter1);
 		fileWriter.close();
 		fileWriter1.close();
-	}
-
+	}*/
+	
 
 	public static void createMainActivity() throws Exception{
-		Template template = getTemplate("MainActivity.java.ftl");
+		Template template = getTemplate("MainActivity.kt.ftl");
 		String [] packages = PACKGE_NAME.split("\\.");
 		String mainActivityPath = PROJECT_ROOT+"/app/src/main/java";
 		for(int i=0;i<packages.length;i++) {
 			mainActivityPath = mainActivityPath+"/"+packages[i];
 		}
-		File mainActivityFile = new File(mainActivityPath+"/MainActivity.java");
+		File mainActivityFile = new File(mainActivityPath+"/MainActivity.kt");
 		if(!mainActivityFile.exists()) {
 			mainActivityFile.createNewFile();
 		}
@@ -191,7 +187,7 @@ public class Generate {
 		template.process(map, fileWriter);
 		fileWriter.close();
 	}
-	
+
 	
 	public static Template getTemplate(String templateName) throws Exception{
 		Configuration configuration = new Configuration();

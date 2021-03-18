@@ -12,7 +12,7 @@ object AppConfig{
     //依赖版本
     const val compileSdkVersion=30//依赖版本
     const val buildToolsVersion="30.0.3"//编译工具版本
-    const val  applicationId = "com.example.aivoiceapp"//包名
+    const val  applicationId = "com.liangke.demo"//包名
 
     const val minSdkVersion =21//最小支持sdk
     const val   targetSdkVersion =30 //当前基于Sdk版本

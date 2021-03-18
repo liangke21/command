@@ -7,10 +7,6 @@ project=$1
 #项目包
 Prepackage=$2
 
-
-
-
-
 #-------------------------数据-------------------------------------------------
 
 #检查项目名称
@@ -47,7 +43,8 @@ mkdir $1
 #进入项目根目录
 cd $1
 
-#init gradle
+#init gradle  一定要提前初始化
+echo "初始化版本gradle"
 gradle init
 
 if [ $? -eq 0 ]; then
@@ -57,27 +54,25 @@ if [ $? -eq 0 ]; then
 #更改代码路径
 rm -rf $1/app/src/main/java/
 mkdir -p $1/app/src/main/java/$package_dir
+mkdir -p $1/app/src/main/jks
 
 mkdir -p $1/app/src/test/java/$package_dir
 
 mkdir -p $1/app/src/androidTest/java/$package_dir
 
 cp -r res/  $1/app/src/main/res
-
+#改App名称
 sed -i "s/appName/$1/g" $1/app/src/main/res/values/strings.xml
+#删除文件
+rm -f $1/build.gradle
+rm -f $1/settings.gradle
+#复制文件
 
-#进入项目根目录
-cd $1
-echo "" >settings.gradle 
- echo "include ':app'" >settings.gradle
-cd  app
-
-mkdir libs
-
-#返回项目根目录
-cd ..
-cd ..
-#file=$4
+cp -r marker/build.gradle.kts  $1/app
+cp -r marker/MainActivity.kt  $1/app/src/main/java/$package_dir
+cp -r marker/mian/build.gradle.kts  $1
+cp -r marker/gradle.properties  $1
+cp -r marker/mian/jks/aivoice.jks  $1/app/src/main/jks
 
 
 # 生成类
@@ -106,6 +101,7 @@ fi
  rm -f Generate.class
 
  ############################################ buildSrc ######################################################
+ echo "执行buildSrc!"
   #更改代码路径
   rm -rf $1/buildSrc/src/main/kotlin/
   mkdir -p $1/buildSrc/src/main/kotlin/
@@ -141,22 +137,26 @@ cd $1
  fi
 
   rm -f GeneratebuildSrc.class
-
+ echo "完成buildSrc!"
 
 ############################################ Module1 ######################################################
+
 #检查项目名称
+
 #如果为空
 if [ -z "$3" ];then
 echo "please input the project name,such as './bulid Test com.example '"
 echo "create project fail !"
-exit 0
+#exit 0
 fi
+
+
 
 #如果纯在
 if [ -d "$3" ]; then
 echo "The project \"$3\" had exists, you must use another name"
 echo "create project fail !"
-exit 0
+#exit 0
 fi
 
 #检查项目包名称
@@ -172,24 +172,17 @@ var=$(echo $3 | tr '[A-Z]' '[a-z]' )
 package_dir4=$(echo $package | sed -e 's/\./\//g' )
 
  #更改代码路径
+ if [ -z "$4" ];then
+ echo "没有文件夹参数"
+ else
  rm -rf $1/$3/src/main/java/
  mkdir -p $1/$3/src/main/java/$package_dir4
  cp -r res/  $1/$3/src/main/res
  sed -i "s/appName/$1/g" $1/$3/src/main/res/values/strings.xml
-
-#进入项目根目录 添加类容
-cd $1
- echo "include ':$3'" >>settings.gradle
-cd  $3
-
- mkdir libs
-
- #返回项目根目录
- cd ..
- cd ..
+fi
 
  #改java代码
-sed -i "s/app/$3/g" Generate.java
+#sed -i "s/app/$3/g" Generate.java
 
 
 # 生成类
@@ -214,11 +207,24 @@ fi
 
  rm -f Generate.class
 #还原java代码
-sed -i "s/$3/app/g" Generate.java
+#sed -i "s/$3/app/g" Generate.java
 ##########################################################################################################
+echo "添加应用 !"
+#进入项目根目录
+cd $1
+echo "" >settings.gradle.kts
+echo 'include(":app")'>settings.gradle.kts
+echo 'include("':$3'")'>>settings.gradle.kts
+echo 'rootProject.name = "'$1'"'>>settings.gradle.kts
+echo 'rootProject.buildFileName="build.gradle.kts"'>>settings.gradle.kts
+
+echo "最后构建项目"
+gradle init
+ #返回项目根目录
+ cd ..
+ cd ..
 
 #  完成执行
-echo "All has been done !"
-#sed -i -e 's|String moduleApp = "app";|String moduleApp = "$3";|' Generate.java
+echo "主项目完成 !"
 #./build Demo com.liangke.demo  Module com.suning.Module
 
